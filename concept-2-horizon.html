@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Echo — Concept 2: Horizon</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CONCEPT 2: HORIZON
+   ──────────────────
+   Rejects both glass-morphism AND dark-minimal. Instead:
+   a WARM, EDITORIAL, TYPOGRAPHIC approach.
+   
+   Inspired by vinyl sleeve inner notes, Criterion Collection
+   menus, and Japanese magazine layouts. Uses large serif type, 
+   generous whitespace, and lets the album art be a contained
+   cinematic widescreen strip rather than a full-bleed background.
+
+   The depth effect here is subtle — instead of 3D parallax gimmicks,
+   the depth mask creates a gentle shadow/highlight separation that 
+   makes the artwork feel printed on textured paper.
+
+   Against the design doc:
+   ✗ WARM tones instead of cold dark
+   ✗ Serif typography instead of Inter/system sans
+   ✗ Editorial layout, not dashboard cards
+   ✗ Contained art strip, not full-bleed ambient
+   ✗ No frosted glass anywhere
+   ✗ No glowing accent — uses matte ink-like accent
+   ✗ Horizontal split layout, not sidebar navigation
+   ✗ Print-inspired, not screen-native
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f0e8;
+  --bg-warm: #ede6d8;
+  --bg-deep: #e8e0d0;
+  --ink: #1a1814;
+  --ink-soft: #5a5550;
+  --ink-faint: #9a9590;
+  --accent: #c24c2e;
+  --accent-soft: rgba(194, 76, 46, 0.1);
+  --accent-line: rgba(194, 76, 46, 0.25);
+  --paper: #faf6ef;
+  --rule: rgba(26, 24, 20, 0.08);
+  --rule-strong: rgba(26, 24, 20, 0.15);
+  --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ══════════════ MASTER LAYOUT: HORIZONTAL SPLIT ══════════════ */
+/*
+   ┌──────────────────┬─────────────────────────────────────┐
+   │                  │                                     │
+   │   ART PANEL      │   CONTENT PANEL                     │
+   │   (40% width)    │   (60% width)                       │
+   │                  │                                     │
+   │   widescreen     │   typography, transport, lyrics,    │
+   │   depth art      │   queue, library                    │
+   │                  │                                     │
+   └──────────────────┴─────────────────────────────────────┘
+*/
+
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* ══════════════ LEFT: ART PANEL ══════════════ */
+
+.art-panel {
+  width: 40%;
+  flex: 0 0 40%;
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+/* Widescreen art with depth layers */
+.art-canvas {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-bg {
+  position: absolute;
+  inset: -5%;
+  background: linear-gradient(135deg, #2d1a2a 0%, #1a1428 40%, #0d0a18 100%);
+  filter: blur(1px);
+  transform: scale(1.05);
+  transition: transform 6s ease;
+}
+
+.art-fg {
+  position: absolute;
+  inset: 0;
+  /* Subtle depth grain overlay */
+  background: 
+    radial-gradient(ellipse 80% 60% at 45% 50%, rgba(180,120,200,0.08), transparent),
+    radial-gradient(ellipse 40% 70% at 55% 45%, rgba(200,160,120,0.06), transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Art info overlay at bottom */
+.art-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 32px 32px;
+  background: linear-gradient(to top, rgba(10,8,12,0.9) 0%, transparent 100%);
+  z-index: 2;
+}
+
+.art-overlay .format-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.art-overlay .depth-status {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border: 1px solid rgba(194, 76, 46, 0.4);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+/* Transport scrub overlaid on art */
+.art-scrub {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  z-index: 3;
+}
+
+.art-scrub-fill {
+  height: 100%;
+  width: 34%;
+  background: var(--accent);
+}
+
+/* ══════════════ RIGHT: CONTENT PANEL ══════════════ */
+
+.content-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--rule);
+}
+
+/* ── Top bar: editorial header ── */
+.ed-header {
+  padding: 28px 36px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ed-header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ed-brand {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.ed-nav {
+  display: flex;
+  gap: 0;
+}
+
+.ed-nav a {
+  padding: 8px 20px 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-decoration: none;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s ease;
+  margin-bottom: -1px;
+}
+
+.ed-nav a:hover {
+  color: var(--ink);
+}
+
+.ed-nav a.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Content area ── */
+.ed-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+/* Page: Now Playing */
+.page { display: none; }
+.page.active { display: block; }
+
+.now-page {
+  padding: 40px 36px;
+}
+
+.now-track {
+  margin-bottom: 36px;
+}
+
+.now-track h1 {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: var(--ink);
+}
+
+.now-track .now-artist {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  font-weight: 400;
+}
+
+.now-track .now-album {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  font-style: italic;
+  font-family: var(--serif);
+}
+
+/* Transport controls — editorial, not orbital */
+.transport-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.t-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.t-btn:hover {
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.t-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.t-btn.play-btn {
+  width: 52px;
+  height: 52px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 50%;
+}
+
+.t-btn.play-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.t-btn.play-btn svg {
+  width: 24px;
+  height: 24px;
+  margin-left: 2px;
+}
+
+.t-time {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.t-time .current { color: var(--ink); }
+
+/* DSP badges — understated editorial tags */
+.dsp-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.dsp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.2s;
+  background: none;
+  letter-spacing: 0.5px;
+}
+
+.dsp-tag:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.dsp-tag.active {
+  border-color: var(--accent-line);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dsp-tag .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Lyrics: editorial typeset ── */
+.lyrics-section {
+  margin-bottom: 40px;
+}
+
+.lyrics-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.lyric-ed {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 2;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 0.4s ease;
+  padding: 2px 0;
+}
+
+.lyric-ed:hover { color: var(--ink-soft); }
+
+.lyric-ed.active {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.lyric-ed.near {
+  color: var(--ink-soft);
+}
+
+/* ── Queue page ── */
+.queue-page {
+  padding: 36px;
+}
+
+.queue-section-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 16px;
+}
+
+.q-track {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.q-track:hover {
+  background: rgba(0,0,0,0.02);
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.q-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.q-art {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--bg-deep);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.q-art-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    hsl(var(--q-hue, 260), 25%, 30%), 
+    hsl(var(--q-hue, 260), 20%, 15%));
+}
+
+.q-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.q-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.q-meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.q-dur {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.q-track.now .q-num { color: var(--accent); }
+.q-track.now .q-title { color: var(--accent); }
+.q-track.now::before {
+  content: '▸';
+  color: var(--accent);
+  font-size: 16px;
+  margin-left: -20px;
+  width: 20px;
+}
+
+/* Gapless seam line between tracks */
+.q-seam {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 2px 44px;
+  font-size: 9px;
+  color: var(--ink-faint);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.q-seam::before, .q-seam::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* ── Browse page ── */
+.browse-page {
+  padding: 36px;
+}
+
+.browse-lenses {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.lens-btn {
+  padding: 7px 16px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: none;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.lens-btn:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.lens-btn.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* Album cards — editorial, print-like */
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.album-card {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-4px);
+}
+
+.album-card-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--bg-deep);
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+}
+
+.album-card-art-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    hsl(var(--album-hue, 260), 20%, 25%), 
+    hsl(var(--album-hue, 260), 15%, 12%));
+}
+
+.album-card-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.album-card-meta {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ══════════════ BOTTOM TRANSPORT BAR ══════════════ */
+/* Persistent, subtle, doesn't compete with the art panel */
+
+.bottom-bar {
+  height: 56px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.bb-progress {
+  flex: 1;
+  height: 2px;
+  background: var(--rule);
+  border-radius: 1px;
+  position: relative;
+}
+
+.bb-progress-fill {
+  height: 100%;
+  width: 34%;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.bb-track {
+  font-size: 12px;
+  color: var(--ink-soft);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.bb-track strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.bb-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.bb-vol {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bb-vol-track {
+  width: 60px;
+  height: 2px;
+  background: var(--rule);
+  border-radius: 1px;
+  position: relative;
+}
+
+.bb-vol-fill {
+  height: 100%;
+  width: 72%;
+  background: var(--ink-faint);
+  border-radius: 1px;
+}
+
+.bb-vol svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--ink-faint);
+}
+
+/* ══════════════ SCROLLBAR ══════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+::selection { background: var(--accent-soft); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- ═══════════ LEFT: ART PANEL ═══════════ -->
+  <div class="art-panel">
+    <div class="art-canvas">
+      <div class="art-bg"></div>
+      <div class="art-fg"></div>
+    </div>
+    <div class="art-overlay">
+      <span class="format-tag">FLAC · 44.1kHz · 16bit</span>
+      <span class="depth-status">● Depth Active</span>
+    </div>
+    <div class="art-scrub">
+      <div class="art-scrub-fill"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ RIGHT: CONTENT ═══════════ -->
+  <div class="content-panel">
+    <div class="ed-header">
+      <div class="ed-header-top">
+        <div class="ed-brand">Echo</div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="t-btn" style="width:32px;height:32px;"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+        </div>
+      </div>
+      <nav class="ed-nav">
+        <a href="#" class="active" data-page="now">Now Playing</a>
+        <a href="#" data-page="queue">Queue</a>
+        <a href="#" data-page="browse">Browse</a>
+        <a href="#" data-page="settings">Settings</a>
+      </nav>
+    </div>
+
+    <div class="ed-content">
+      <!-- ── NOW PLAYING ── -->
+      <div class="page now-page active" id="page-now">
+        <div class="now-track">
+          <h1>Aishite Aishite<br>Aishite</h1>
+          <div class="now-artist">Kikuo</div>
+          <div class="now-album">きくおミク3 — 2013</div>
+        </div>
+
+        <div class="transport-row">
+          <button class="t-btn"><svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+          <button class="t-btn"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+          <button class="t-btn play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+          <button class="t-btn"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+          <button class="t-btn"><svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
+          <div class="t-time"><span class="current">1:23</span> / 4:07</div>
+        </div>
+
+        <div class="dsp-row">
+          <button class="dsp-tag active"><span class="dot"></span> Gapless</button>
+          <button class="dsp-tag"><span class="dot"></span> Concert Hall</button>
+          <button class="dsp-tag"><span class="dot"></span> 1.0× Speed</button>
+          <button class="dsp-tag"><span class="dot"></span> Stereo</button>
+        </div>
+
+        <div class="lyrics-section">
+          <div class="lyrics-label">Lyrics</div>
+          <p class="lyric-ed">嗚呼 気が狂いそう</p>
+          <p class="lyric-ed near">触りたいの 貴方の全部</p>
+          <p class="lyric-ed active">愛して 愛して 愛して</p>
+          <p class="lyric-ed near">もっともっと 愛して</p>
+          <p class="lyric-ed">ねぇ 全部ちょうだい</p>
+          <p class="lyric-ed">壊れてもいいの</p>
+          <p class="lyric-ed">嗚呼 気が狂いそう</p>
+          <p class="lyric-ed">最後まで</p>
+          <p class="lyric-ed">離さないで 離さないで</p>
+          <p class="lyric-ed">お願い もう離さないで</p>
+        </div>
+      </div>
+
+      <!-- ── QUEUE ── -->
+      <div class="page queue-page" id="page-queue">
+        <div class="queue-section-label">Now Playing</div>
+        <div class="q-track now">
+          <span class="q-num">1</span>
+          <div class="q-art"><div class="q-art-inner" style="--q-hue: 270"></div></div>
+          <div class="q-info">
+            <div class="q-title">Aishite Aishite Aishite</div>
+            <div class="q-meta">Kikuo · きくおミク3</div>
+          </div>
+          <span class="q-dur">4:07</span>
+        </div>
+        <div class="q-seam">gapless</div>
+
+        <div class="queue-section-label" style="margin-top:20px">Up Next</div>
+        <div class="q-track">
+          <span class="q-num">2</span>
+          <div class="q-art"><div class="q-art-inner" style="--q-hue: 220"></div></div>
+          <div class="q-info">
+            <div class="q-title">UFO</div>
+            <div class="q-meta">Kikuo · きくおミク4</div>
+          </div>
+          <span class="q-dur">3:42</span>
+        </div>
+        <div class="q-seam">gapless</div>
+        <div class="q-track">
+          <span class="q-num">3</span>
+          <div class="q-art"><div class="q-art-inner" style="--q-hue: 320"></div></div>
+          <div class="q-info">
+            <div class="q-title">Gomenne Gomenne</div>
+            <div class="q-meta">Kikuo · きくおミク2</div>
+          </div>
+          <span class="q-dur">5:18</span>
+        </div>
+        <div class="q-track">
+          <span class="q-num">4</span>
+          <div class="q-art"><div class="q-art-inner" style="--q-hue: 180"></div></div>
+          <div class="q-info">
+            <div class="q-title">Hole-Dwelling</div>
+            <div class="q-meta">Kikuo · きくおミク5</div>
+          </div>
+          <span class="q-dur">3:55</span>
+        </div>
+        <div class="q-track">
+          <span class="q-num">5</span>
+          <div class="q-art"><div class="q-art-inner" style="--q-hue: 30"></div></div>
+          <div class="q-info">
+            <div class="q-title">Kimi wa Dekinai Ko</div>
+            <div class="q-meta">Kikuo · きくおミク3</div>
+          </div>
+          <span class="q-dur">4:31</span>
+        </div>
+      </div>
+
+      <!-- ── BROWSE ── -->
+      <div class="page browse-page" id="page-browse">
+        <div class="browse-lenses">
+          <button class="lens-btn active">Albums</button>
+          <button class="lens-btn">Artists</button>
+          <button class="lens-btn">Songs</button>
+          <button class="lens-btn">Folders</button>
+          <button class="lens-btn">Formats</button>
+          <button class="lens-btn">Years</button>
+        </div>
+
+        <div class="album-grid">
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 270"></div></div>
+            <div class="album-card-title">きくおミク3</div>
+            <div class="album-card-meta">Kikuo · 2013 · 12 tracks</div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 220"></div></div>
+            <div class="album-card-title">きくおミク4</div>
+            <div class="album-card-meta">Kikuo · 2014 · 10 tracks</div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 320"></div></div>
+            <div class="album-card-title">きくおミク2</div>
+            <div class="album-card-meta">Kikuo · 2012 · 11 tracks</div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 180"></div></div>
+            <div class="album-card-title">きくおミク5</div>
+            <div class="album-card-meta">Kikuo · 2016 · 14 tracks</div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 40"></div></div>
+            <div class="album-card-title">UFO</div>
+            <div class="album-card-meta">Kikuo · 2015 · 8 tracks</div>
+          </div>
+          <div class="album-card">
+            <div class="album-card-art"><div class="album-card-art-inner" style="--album-hue: 120"></div></div>
+            <div class="album-card-title">きくおミク</div>
+            <div class="album-card-meta">Kikuo · 2011 · 10 tracks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="bb-track"><strong>Aishite Aishite Aishite</strong> — Kikuo</div>
+      <div class="bb-progress"><div class="bb-progress-fill"></div></div>
+      <div class="bb-time">1:23 / 4:07</div>
+      <div class="bb-vol">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        <div class="bb-vol-track"><div class="bb-vol-fill"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('.ed-nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const page = a.dataset.page;
+    document.querySelectorAll('.ed-nav a').forEach(n => n.classList.remove('active'));
+    a.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+  });
+});
+
+// Lens buttons
+document.querySelectorAll('.lens-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lens-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// DSP toggles
+document.querySelectorAll('.dsp-tag').forEach(tag => {
+  tag.addEventListener('click', () => tag.classList.toggle('active'));
+});
+
+// Parallax on art panel
+const artPanel = document.querySelector('.art-panel');
+const artBg = document.querySelector('.art-bg');
+artPanel.addEventListener('mousemove', e => {
+  const rect = artPanel.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width - 0.5;
+  const y = (e.clientY - rect.top) / rect.height - 0.5;
+  artBg.style.transform = `translate(${-x * 10}px, ${-y * 8}px) scale(1.05)`;
+});
+</script>
+
+</body>
+</html>

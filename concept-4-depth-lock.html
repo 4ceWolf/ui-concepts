@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Echo — Concept 4: Depth Lock (The Apple iOS Wallpaper Depth Effect)</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CONCEPT 4: DEPTH LOCK (TRUE WALLPAPER DEPTH EFFECT)
+   ──────────────────────────────────────────────────
+   Built precisely around the user's signature request:
+   "yk how apple has wallpaper depth? like clock goes behind mountains 
+   in a wallpaper or a person or smth? lets apply that too...
+   music control icons n stuff go behind the wallpaper...
+   blur the surrounding area of buttons...
+   let lyrics be in the center and have wallpaper depth too. 
+   first ever?"
+
+   THE 4-LAYER SANDWICH STACK:
+   ┌──────────────────────────────────────────────────────────┐
+   │ Layer 4: FOREGROUND SUBJECT MASK                         │
+   │ (Character / Silhouette / Mountain extracted by Depth AI)│
+   │   → Occludes lyrics, transport, and background time      │
+   ├──────────────────────────────────────────────────────────┤
+   │ Layer 3: INTERACTIVE CONTROLS & FLOATING LYRICS          │
+   │ (Frosted glass button halos, center kinetic lyrics)      │
+   │   → Slips under foreground subject, over background art  │
+   ├──────────────────────────────────────────────────────────┤
+   │ Layer 2: GIANT MONOLITHIC CLOCK / TRACK HEADING          │
+   │ (iOS 16+ style typography that weaves behind subject)    │
+   ├──────────────────────────────────────────────────────────┤
+   │ Layer 1: AMBIENT FULL-BLEED BACKGROUND ART               │
+   │ (Deep spatial atmosphere + subtle drift)                 │
+   └──────────────────────────────────────────────────────────┘
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #8b5cf6;
+  --accent-rgb: 139, 92, 246;
+  --accent-glow: rgba(139, 92, 246, 0.45);
+  --bg-deep: #07060b;
+  --text-main: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.55);
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  user-select: none;
+}
+
+/* ══════════════ THE DEPTH STAGE ══════════════ */
+.depth-stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+/* ── LAYER 1: AMBIENT BACKGROUND ART (Depth Z: -60px) ── */
+.layer-background {
+  position: absolute;
+  inset: -10%;
+  z-index: 1;
+  background: 
+    radial-gradient(circle at 50% 35%, #3b1d60 0%, #15092a 45%, #070412 100%);
+  transform-style: preserve-3d;
+  transform: translateZ(-60px) scale(1.15);
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+.layer-background-art {
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><defs><radialGradient id="sky" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="%236d28d9" stop-opacity="0.8"/><stop offset="50%" stop-color="%232e1065" stop-opacity="0.9"/><stop offset="100%" stop-color="%23090514"/></radialGradient><linearGradient id="mountains" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%231e0836"/><stop offset="100%" stop-color="%230b0217"/></linearGradient></defs><rect width="1000" height="1000" fill="url(%23sky)"/><circle cx="500" cy="280" r="180" fill="%23ec4899" opacity="0.35" filter="blur(60px)"/><polygon points="0,750 250,580 480,720 750,530 1000,680 1000,1000 0,1000" fill="url(%23mountains)" opacity="0.95"/></svg>') center/cover no-repeat;
+  filter: saturate(1.2) contrast(1.1);
+}
+
+.ambient-particles {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 80% 40%, rgba(236,72,153,0.5), transparent),
+    radial-gradient(3px 3px at 45% 65%, rgba(139,92,246,0.5), transparent);
+  background-size: 350px 350px;
+  opacity: 0.7;
+}
+
+/* ── LAYER 2: GIANT MONOLITHIC TIME & TRACK HEADING (Depth Z: -20px) ── */
+.layer-behind-subject {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 5vh;
+  transform: translateZ(-20px) scale(1.05);
+  transition: transform 0.15s ease-out;
+  pointer-events: none;
+}
+
+/* iOS-Style Giant Depth Clock */
+.clock-display {
+  font-size: clamp(6rem, 18vw, 15rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  opacity: 0.85;
+  mix-blend-mode: overlay;
+}
+
+.giant-track-title {
+  margin-top: 10px;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  max-width: 85vw;
+}
+
+/* ── LAYER 3: LYRICS & FROSTED CONTROLS (Depth Z: +10px) ── */
+.layer-mid-content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3vh 4vw 4vh;
+  transform: translateZ(10px);
+  transition: transform 0.15s ease-out;
+}
+
+/* Header bar */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(15, 12, 28, 0.5);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.brand-badge span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.depth-pill-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #d8b4fe;
+}
+
+.depth-pill-status .pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 10px #a855f7;
+  animation: depth-ping 2s infinite;
+}
+
+@keyframes depth-ping {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+
+/* Center Lyrics — Positioned in the sweet spot to go BEHIND the foreground subject */
+.center-lyrics-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: auto 0;
+  max-width: 900px;
+  align-self: center;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.lyric-item {
+  font-size: clamp(1.4rem, 3.2vw, 3rem);
+  font-weight: 700;
+  line-height: 1.8;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.25);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  padding: 4px 16px;
+  border-radius: 12px;
+}
+
+.lyric-item:hover {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lyric-item.active {
+  color: #ffffff;
+  transform: scale(1.08);
+  text-shadow: 0 0 40px rgba(139, 92, 246, 0.7);
+}
+
+.lyric-item.adjacent {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Bottom Controls: Frosted Floating Island ── */
+.bottom-controls-island {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  z-index: 10;
+}
+
+/* Surrounding blur halo for buttons as requested ("blur the surrounding area of buttons") */
+.frosted-glass-halo {
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 28px;
+  background: rgba(14, 10, 26, 0.45);
+  backdrop-filter: blur(36px) saturate(2);
+  -webkit-backdrop-filter: blur(36px) saturate(2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(139, 92, 246, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Scrub line */
+.scrub-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scrub-timestamp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  width: 38px;
+}
+
+.scrub-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+}
+
+.scrub-progress {
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  border-radius: 999px;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.control-buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ctrl-side-group {
+  display: flex;
+  gap: 8px;
+}
+
+.frost-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text-main);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.frost-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.frost-button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.frost-button.play-hero {
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  border: none;
+  box-shadow: 0 10px 30px var(--accent-glow);
+}
+
+.frost-button.play-hero:hover {
+  transform: scale(1.14);
+  box-shadow: 0 14px 40px var(--accent-glow);
+}
+
+.frost-button.play-hero svg {
+  width: 24px;
+  height: 24px;
+  margin-left: 3px;
+}
+
+/* ── LAYER 4: THE FOREGROUND SUBJECT MASK (Depth Z: +40px) ── */
+/* The hero: this cut-out subject is layered ON TOP of the lyrics, clock, and controls! */
+.layer-foreground-subject {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translateZ(40px) scale(1.02);
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* Silhouette / Subject cut out by AI Segmentation / Depth map */
+.subject-image {
+  width: min(80vw, 760px);
+  height: 82vh;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800"><defs><linearGradient id="charGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23c084fc"/><stop offset="50%" stop-color="%236b21a8"/><stop offset="100%" stop-color="%231e112a"/></linearGradient><radialGradient id="hairGlow" cx="50%" cy="30%" r="50%"><stop offset="0%" stop-color="%23f472b6"/><stop offset="100%" stop-color="%239333ea"/></radialGradient></defs><g filter="drop-shadow(0 20px 35px rgba(0,0,0,0.85))"><path d="M 300,120 C 230,120 180,180 180,270 C 180,360 220,400 240,430 C 210,470 120,530 90,620 C 65,690 60,760 60,800 L 540,800 C 540,760 535,690 510,620 C 480,530 390,470 360,430 C 380,400 420,360 420,270 C 420,180 370,120 300,120 Z" fill="url(%23charGrad)"/><circle cx="300" cy="240" r="75" fill="%23f5d0fe" opacity="0.9"/><path d="M 230,180 C 250,130 350,130 370,180 C 400,190 410,250 400,280 C 370,240 330,220 300,220 C 270,220 230,240 200,280 C 190,250 200,190 230,180 Z" fill="url(%23hairGlow)"/></g></svg>') bottom center no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.9));
+}
+
+/* Depth toggle HUD (interactive widget in bottom right) */
+.depth-hud-switch {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: rgba(15, 10, 25, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.depth-hud-switch:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.switch-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 10px #a855f7;
+}
+
+body.depth-off .layer-foreground-subject {
+  opacity: 0.15 !important;
+  filter: grayscale(1) blur(4px);
+}
+
+body.depth-off .clock-display,
+body.depth-off .center-lyrics-stage {
+  z-index: 50;
+}
+</style>
+</head>
+<body>
+
+<div class="depth-stage" id="stage">
+  <!-- LAYER 1: Deep Ambient Background -->
+  <div class="layer-background" id="layerBg">
+    <div class="layer-background-art"></div>
+    <div class="ambient-particles"></div>
+  </div>
+
+  <!-- LAYER 2: Giant Clock & Track Info (BEHIND SUBJECT) -->
+  <div class="layer-behind-subject" id="layerClock">
+    <div class="clock-display" id="clock">10:42</div>
+    <div class="giant-track-title">Aishite Aishite Aishite</div>
+  </div>
+
+  <!-- LAYER 3: Mid Layer Lyrics & Controls -->
+  <div class="layer-mid-content" id="layerMid">
+    <!-- Top Bar -->
+    <header class="top-nav">
+      <div class="brand-badge">
+        <span>ECHO</span>
+        <span style="opacity: 0.4">|</span>
+        <span style="color: #fff; font-size: 10px; letter-spacing: 1px;">KIKUO - きくおミク3</span>
+      </div>
+
+      <div class="depth-pill-status">
+        <div class="pulse-dot"></div>
+        <span>WALLPAPER DEPTH ACTIVE</span>
+      </div>
+    </header>
+
+    <!-- Center Floating Lyrics: These slide BEHIND the character! -->
+    <div class="center-lyrics-stage">
+      <div class="lyric-item">嗚呼 気が狂いそう</div>
+      <div class="lyric-item adjacent">触りたいの 貴方の全部</div>
+      <div class="lyric-item active">愛して 愛して 愛して</div>
+      <div class="lyric-item adjacent">もっともっと 愛して</div>
+      <div class="lyric-item">ねぇ 全部ちょうだい</div>
+    </div>
+
+    <!-- Bottom Controls with Surrounding Frosted Blur Halo -->
+    <footer class="bottom-controls-island">
+      <div class="frosted-glass-halo">
+        <!-- Scrub Bar -->
+        <div class="scrub-container">
+          <span class="scrub-timestamp">1:23</span>
+          <div class="scrub-bar">
+            <div class="scrub-progress"></div>
+          </div>
+          <span class="scrub-timestamp" style="text-align: right;">4:07</span>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="control-buttons-row">
+          <div class="ctrl-side-group">
+            <button class="frost-button" title="Shuffle">
+              <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+            </button>
+            <button class="frost-button" title="Concert Hall">
+              <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button class="frost-button" title="Previous">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="frost-button play-hero" title="Play / Pause">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="frost-button" title="Next">
+              <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+          </div>
+
+          <div class="ctrl-side-group">
+            <button class="frost-button" title="Repeat">
+              <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+            </button>
+            <button class="frost-button" title="Audio Quality: FLAC 96kHz">
+              <span style="font-size: 10px; font-weight: 800; font-family: 'JetBrains Mono';">96k</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- LAYER 4: The Foreground Subject Mask (OCCLUDES BEHIND LAYERS) -->
+  <div class="layer-foreground-subject" id="layerSubject">
+    <div class="subject-image"></div>
+  </div>
+</div>
+
+<!-- Interactive Switch to toggle depth on/off -->
+<div class="depth-hud-switch" id="depthToggle">
+  <div class="switch-circle"></div>
+  <span id="depthToggleText">Depth Effect: ON</span>
+</div>
+
+<script>
+// Parallax Engine — Realistic 3D Gyroscope / Mouse Mapping
+const stage = document.getElementById('stage');
+const layerBg = document.getElementById('layerBg');
+const layerClock = document.getElementById('layerClock');
+const layerMid = document.getElementById('layerMid');
+const layerSubject = document.getElementById('layerSubject');
+const depthToggle = document.getElementById('depthToggle');
+const depthToggleText = document.getElementById('depthToggleText');
+
+let mouseX = 0, mouseY = 0;
+let targetX = 0, targetY = 0;
+let depthEnabled = true;
+
+window.addEventListener('mousemove', (e) => {
+  if (!depthEnabled) return;
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  targetX = (e.clientX - cx) / cx;
+  targetY = (e.clientY - cy) / cy;
+});
+
+function updateParallax() {
+  mouseX += (targetX - mouseX) * 0.08;
+  mouseY += (targetY - mouseY) * 0.08;
+
+  if (depthEnabled) {
+    // Background drifts slowly opposite
+    layerBg.style.transform = `translate3d(${-mouseX * 25}px, ${-mouseY * 18}px, -60px) scale(1.15)`;
+    
+    // Giant time/clock behind subject drifts medium
+    layerClock.style.transform = `translate3d(${-mouseX * 12}px, ${-mouseY * 8}px, -20px) scale(1.05)`;
+    
+    // Mid lyrics drift slightly
+    layerMid.style.transform = `translate3d(${mouseX * 10}px, ${mouseY * 6}px, 10px)`;
+    
+    // Foreground subject moves forward & pronounced (giving the true Apple parallax illusion!)
+    layerSubject.style.transform = `translate3d(${mouseX * 38}px, ${mouseY * 20}px, 40px) scale(1.02)`;
+  }
+
+  requestAnimationFrame(updateParallax);
+}
+requestAnimationFrame(updateParallax);
+
+// Toggle Depth effect on/off for instant comparison
+depthToggle.addEventListener('click', () => {
+  depthEnabled = !depthEnabled;
+  document.body.classList.toggle('depth-off', !depthEnabled);
+  depthToggleText.textContent = depthEnabled ? 'Depth Effect: ON' : 'Depth Effect: OFF';
+  if (!depthEnabled) {
+    layerBg.style.transform = 'none';
+    layerClock.style.transform = 'none';
+    layerMid.style.transform = 'none';
+    layerSubject.style.transform = 'none';
+  }
+});
+
+// Update clock in real-time
+function updateClock() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+
+</body>
+</html>

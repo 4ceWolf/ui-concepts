@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Echo — Concept 3: Stratum</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CONCEPT 3: STRATUM
+   ──────────────────
+   The depth mask concept taken to its logical extreme.
+   
+   Instead of depth being a visual effect ON the UI, the depth map
+   literally IS the UI topology. The interface has physical strata
+   — layers that cast real shadows on each other, with the album 
+   art's depth mask determining which UI elements are "above" and
+   "below" in the visual stack.
+   
+   Three geological layers:
+   ┌─ STRATUM 3 (sky) ─── Transport + branding ──────────────┐
+   │                                                          │
+   ├─ STRATUM 2 (surface) ── Now playing info + lyrics ──────┤
+   │                                                          │
+   ├─ STRATUM 1 (bedrock) ── Queue + Library + Settings ─────┤
+   │                                                          │
+   └──────────────────────────────────────────────────────────┘
+   
+   The album art fills the ENTIRE viewport. The depth mask slices
+   it into foreground/background. UI elements exist AT DIFFERENT
+   DEPTH LEVELS, and the foreground art actually OCCLUDES parts
+   of the UI — creating real spatial hierarchy.
+   
+   Navigation: no tabs, no pages. Everything is spatially stacked
+   and accessed by scrolling "deeper" into the interface.
+
+   Against the design doc:
+   ✗ No pages/views — everything visible simultaneously via depth
+   ✗ No sidebar, no tabs, no cards
+   ✗ Brutalist typography, not refined
+   ✗ High contrast black/white, not warm or cool — MONOCHROME
+   ✗ Depth determines UI layout, not content hierarchy
+   ✗ Spatial navigation, not tab-based
+   ✗ Album art completely dominates viewport
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --off-white: #e8e8e8;
+  --gray: #888888;
+  --dark-gray: #444444;
+  --near-black: #1a1a1a;
+  --black: #0a0a0a;
+  --accent: #ff3c00;
+  --accent-dim: rgba(255, 60, 0, 0.15);
+  --mono: 'Space Mono', monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+  --shadow-deep: 0 20px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+  --shadow-mid: 0 10px 30px rgba(0,0,0,0.3);
+  --shadow-light: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════ THE VIEWPORT IS THE ART ══════════════ */
+
+.stratum-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Art background — fills everything */
+.art-absolute {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background: linear-gradient(160deg, #1a0a28 0%, #0d0618 30%, #180828 60%, #0a0410 100%);
+  filter: blur(0.5px) saturate(1.2);
+  transition: transform 8s ease;
+}
+
+/* Depth map driven vignette/shading */
+.depth-shading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: 
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0,0,0,0.7), transparent 70%),
+    radial-gradient(ellipse 80% 100% at 0% 50%, rgba(0,0,0,0.3), transparent 60%),
+    radial-gradient(ellipse 80% 100% at 100% 50%, rgba(0,0,0,0.3), transparent 60%);
+  pointer-events: none;
+}
+
+/* ══════════════ STRATUM 1: BEDROCK (bottom layer) ══════════════ */
+/* Queue and library — darkest, most recessed */
+
+.stratum-1 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-height: 45vh;
+  overflow-y: auto;
+  mask-image: linear-gradient(to top, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 85%, transparent 100%);
+}
+
+.bedrock-content {
+  padding: 20px 32px 32px;
+}
+
+.bedrock-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bedrock-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.bed-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: 0.2s;
+  opacity: 0.5;
+}
+
+.bed-track:hover { opacity: 0.8; }
+.bed-track.now { opacity: 1; }
+
+.bed-idx {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dark-gray);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bed-track.now .bed-idx { color: var(--accent); }
+
+.bed-art {
+  width: 36px;
+  height: 36px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(255,255,255,0.03);
+}
+
+.bed-art-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    hsl(var(--bed-hue, 260), 30%, 18%), 
+    hsl(var(--bed-hue, 260), 20%, 8%));
+}
+
+.bed-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.bed-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bed-track.now .bed-title { color: var(--accent); }
+
+.bed-meta {
+  font-size: 11px;
+  color: var(--dark-gray);
+  margin-top: 1px;
+}
+
+.bed-dur {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dark-gray);
+  flex-shrink: 0;
+}
+
+/* Gapless indicator */
+.bed-seam {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--dark-gray);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 2px 0 2px 38px;
+  opacity: 0.4;
+}
+
+/* ══════════════ STRATUM 2: SURFACE (mid layer) ══════════════ */
+/* Now playing info + lyrics — floats above bedrock */
+
+.stratum-2 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 45vh;
+  z-index: 10;
+  padding: 0 32px;
+  pointer-events: none;
+}
+
+.surface-content {
+  pointer-events: auto;
+  max-width: 100%;
+}
+
+/* Track info — massive brutalist type */
+.surface-track {
+  margin-bottom: 16px;
+}
+
+.surface-track h1 {
+  font-family: var(--sans);
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: var(--shadow-deep);
+  /* Intentionally aggressive, brutalist, anti-design-doc */
+}
+
+.surface-track .s-artist {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--off-white);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  text-shadow: var(--shadow-mid);
+}
+
+.surface-track .s-album {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray);
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* Lyrics — monospace, left-aligned, sparse */
+.surface-lyrics {
+  margin-top: 20px;
+  max-width: 480px;
+}
+
+.s-lyric {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 2.2;
+  color: rgba(255,255,255,0.1);
+  transition: color 0.5s, text-shadow 0.5s;
+  cursor: pointer;
+}
+
+.s-lyric:hover { color: rgba(255,255,255,0.25); }
+.s-lyric.active { 
+  color: var(--white); 
+  text-shadow: 0 0 40px rgba(255,60,0,0.3);
+}
+.s-lyric.near { color: rgba(255,255,255,0.3); }
+
+/* ══════════════ STRATUM 3: SKY (top layer) ══════════════ */
+/* Transport + branding — floats above everything */
+
+.stratum-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 24px 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* Brand mark */
+.sky-brand {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: var(--shadow-mid);
+}
+
+/* Sky controls — minimal row */
+.sky-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sky-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--off-white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sky-btn:hover {
+  border-color: rgba(255,255,255,0.2);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.sky-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.sky-btn.search-btn {
+  width: auto;
+  border-radius: 20px;
+  padding: 0 16px;
+  gap: 8px;
+  display: flex;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* ══════════════ TRANSPORT BAR (between strata 2 & 1) ══════════════ */
+/* The scrub/controls bar — acts as a geological fault line */
+
+.fault-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(45vh - 2px);
+  z-index: 15;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 14px;
+  /* Geological crack effect */
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    rgba(0,0,0,0.6) 30%,
+    rgba(0,0,0,0.8) 50%,
+    rgba(0,0,0,0.6) 70%,
+    transparent 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.fault-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: var(--gray);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.fault-btn:hover { color: var(--white); }
+.fault-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+.fault-btn.play {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  color: var(--black);
+}
+
+.fault-btn.play:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(255,60,0,0.3);
+}
+
+.fault-btn.play svg { width: 22px; height: 22px; margin-left: 2px; }
+
+/* Scrub */
+.fault-scrub {
+  flex: 1;
+  height: 2px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 1px;
+  position: relative;
+  cursor: pointer;
+}
+
+.fault-scrub-fill {
+  height: 100%;
+  width: 34%;
+  background: var(--accent);
+  border-radius: 1px;
+  position: relative;
+}
+
+.fault-scrub-fill::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(255,60,0,0.5);
+}
+
+.fault-time {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray);
+  flex-shrink: 0;
+}
+
+/* Secondary controls in fault line */
+.fault-extras {
+  display: flex;
+  gap: 4px;
+}
+
+.fault-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 3px;
+  color: var(--dark-gray);
+  background: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.fault-tag:hover { border-color: rgba(255,255,255,0.15); color: var(--gray); }
+.fault-tag.on { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ══════════════ FOREGROUND ART LAYER ══════════════ */
+/* This layer represents the depth mask foreground — 
+   it sits ABOVE strata 2 and 3, partially occluding the UI */
+
+.depth-foreground {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  /* Simulated foreground subject — in real app, this would be
+     the depth-mask-masked album art foreground */
+  mask-image: radial-gradient(ellipse 35% 60% at 65% 45%, black, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 35% 60% at 65% 45%, black, transparent 70%);
+  background: 
+    radial-gradient(ellipse 50% 70% at 65% 45%, rgba(60,20,100,0.6), transparent 60%),
+    radial-gradient(ellipse 30% 50% at 60% 50%, rgba(80,30,120,0.4), transparent 50%);
+  opacity: 0.7;
+}
+
+/* Interaction hint — shows the depth is real */
+.depth-hint {
+  position: absolute;
+  bottom: calc(45vh + 70px);
+  right: 32px;
+  z-index: 30;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dark-gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.5;
+}
+
+.depth-hint::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: depth-pulse 2s ease infinite;
+}
+
+@keyframes depth-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* ══════════════ STRATUM SCROLL WHEEL ══════════════ */
+/* On the right edge — shows which depth layer is focused */
+
+.strata-indicator {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.strata-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.strata-dot:hover { background: rgba(255,255,255,0.3); }
+.strata-dot.active { 
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(255,60,0,0.4);
+  width: 8px;
+  height: 8px;
+}
+
+.strata-line {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.04);
+}
+
+/* ══════════════ SEARCH OVERLAY (slides down from sky) ══════════════ */
+
+.search-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 80px 32px 32px;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.95), rgba(10,10,10,0.8) 80%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: translateY(-100%);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.search-overlay.open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 14px 0;
+  background: none;
+  border: none;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  outline: none;
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--white);
+  letter-spacing: -0.5px;
+}
+
+.search-input::placeholder { color: var(--dark-gray); }
+.search-input:focus { border-bottom-color: var(--accent); }
+
+/* ══════════════ SCROLLBAR ══════════════ */
+.stratum-1::-webkit-scrollbar { width: 3px; }
+.stratum-1::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 3px; }
+.stratum-1::-webkit-scrollbar-track { background: transparent; }
+
+::selection { background: rgba(255,60,0,0.3); color: var(--white); }
+</style>
+</head>
+<body>
+
+<div class="stratum-viewport">
+  <!-- Base art layer -->
+  <div class="art-absolute" id="artBg"></div>
+  <div class="depth-shading"></div>
+
+  <!-- STRATUM 3: SKY -->
+  <div class="stratum-3">
+    <div class="sky-brand">Echo</div>
+    <div class="sky-controls">
+      <button class="sky-btn search-btn" id="searchToggle">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        Search
+      </button>
+      <button class="sky-btn">
+        <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      </button>
+      <button class="sky-btn">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.6 3.6 0 0112 15.6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search overlay -->
+  <div class="search-overlay" id="searchOverlay">
+    <input type="text" class="search-input" placeholder="Search tracks, artists, albums..." autofocus />
+  </div>
+
+  <!-- STRATUM 2: SURFACE -->
+  <div class="stratum-2">
+    <div class="surface-content">
+      <div class="surface-track">
+        <h1>Aishite<br>Aishite<br>Aishite</h1>
+        <div class="s-artist">Kikuo</div>
+        <div class="s-album">きくおミク3 — 2013</div>
+      </div>
+      <div class="surface-lyrics">
+        <p class="s-lyric">嗚呼 気が狂いそう</p>
+        <p class="s-lyric near">触りたいの 貴方の全部</p>
+        <p class="s-lyric active">愛して 愛して 愛して</p>
+        <p class="s-lyric near">もっともっと 愛して</p>
+        <p class="s-lyric">ねぇ 全部ちょうだい</p>
+        <p class="s-lyric">壊れてもいいの</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Depth foreground overlay (simulated subject) -->
+  <div class="depth-foreground"></div>
+
+  <!-- Depth indicator -->
+  <div class="depth-hint">
+    <span>Depth Active</span>
+  </div>
+
+  <!-- FAULT LINE: Transport -->
+  <div class="fault-line">
+    <button class="fault-btn"><svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+    <button class="fault-btn"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+    <button class="fault-btn play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+    <button class="fault-btn"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+    <button class="fault-btn"><svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
+
+    <div class="fault-scrub">
+      <div class="fault-scrub-fill"></div>
+    </div>
+
+    <span class="fault-time">1:23 / 4:07</span>
+
+    <div class="fault-extras">
+      <button class="fault-tag on">Gapless</button>
+      <button class="fault-tag">Hall</button>
+      <button class="fault-tag">FLAC</button>
+    </div>
+  </div>
+
+  <!-- STRATUM 1: BEDROCK (queue) -->
+  <div class="stratum-1">
+    <div class="bedrock-content">
+      <div class="bedrock-label">Queue · 5 tracks · 21:33</div>
+
+      <div class="bed-track now">
+        <span class="bed-idx">01</span>
+        <div class="bed-art"><div class="bed-art-inner" style="--bed-hue: 270"></div></div>
+        <div class="bed-info">
+          <div class="bed-title">Aishite Aishite Aishite</div>
+          <div class="bed-meta">Kikuo · きくおミク3</div>
+        </div>
+        <span class="bed-dur">4:07</span>
+      </div>
+      <div class="bed-seam">▸ gapless</div>
+
+      <div class="bed-track">
+        <span class="bed-idx">02</span>
+        <div class="bed-art"><div class="bed-art-inner" style="--bed-hue: 220"></div></div>
+        <div class="bed-info">
+          <div class="bed-title">UFO</div>
+          <div class="bed-meta">Kikuo · きくおミク4</div>
+        </div>
+        <span class="bed-dur">3:42</span>
+      </div>
+      <div class="bed-seam">▸ gapless</div>
+
+      <div class="bed-track">
+        <span class="bed-idx">03</span>
+        <div class="bed-art"><div class="bed-art-inner" style="--bed-hue: 320"></div></div>
+        <div class="bed-info">
+          <div class="bed-title">Gomenne Gomenne</div>
+          <div class="bed-meta">Kikuo · きくおミク2</div>
+        </div>
+        <span class="bed-dur">5:18</span>
+      </div>
+
+      <div class="bed-track">
+        <span class="bed-idx">04</span>
+        <div class="bed-art"><div class="bed-art-inner" style="--bed-hue: 180"></div></div>
+        <div class="bed-info">
+          <div class="bed-title">Hole-Dwelling</div>
+          <div class="bed-meta">Kikuo · きくおミク5</div>
+        </div>
+        <span class="bed-dur">3:55</span>
+      </div>
+
+      <div class="bed-track">
+        <span class="bed-idx">05</span>
+        <div class="bed-art"><div class="bed-art-inner" style="--bed-hue: 30"></div></div>
+        <div class="bed-info">
+          <div class="bed-title">Kimi wa Dekinai Ko</div>
+          <div class="bed-meta">Kikuo · きくおミク3</div>
+        </div>
+        <span class="bed-dur">4:31</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strata indicator -->
+  <div class="strata-indicator">
+    <div class="strata-dot active" title="Sky"></div>
+    <div class="strata-line"></div>
+    <div class="strata-dot" title="Surface"></div>
+    <div class="strata-line"></div>
+    <div class="strata-dot" title="Bedrock"></div>
+  </div>
+</div>
+
+<script>
+// Search toggle
+const searchToggle = document.getElementById('searchToggle');
+const searchOverlay = document.getElementById('searchOverlay');
+searchToggle.addEventListener('click', () => {
+  searchOverlay.classList.toggle('open');
+  if (searchOverlay.classList.contains('open')) {
+    searchOverlay.querySelector('input').focus();
+  }
+});
+
+// Close search on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') searchOverlay.classList.remove('open');
+});
+
+// Parallax on mouse move
+const artBg = document.getElementById('artBg');
+const depthFg = document.querySelector('.depth-foreground');
+const surface = document.querySelector('.stratum-2');
+
+document.addEventListener('mousemove', e => {
+  const x = e.clientX / window.innerWidth - 0.5;
+  const y = e.clientY / window.innerHeight - 0.5;
+  
+  // Background: slow, inverted
+  artBg.style.transform = `translate(${-x * 15}px, ${-y * 10}px)`;
+  
+  // Foreground: faster, same direction (depth effect)
+  depthFg.style.transform = `translate(${x * 30}px, ${y * 20}px)`;
+  
+  // Surface text: very subtle movement
+  surface.style.transform = `translate(${x * 5}px, ${y * 3}px)`;
+});
+
+// Fault line tag toggles
+document.querySelectorAll('.fault-tag').forEach(tag => {
+  tag.addEventListener('click', () => tag.classList.toggle('on'));
+});
+
+// Strata dot navigation (simulated)
+document.querySelectorAll('.strata-dot').forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    document.querySelectorAll('.strata-dot').forEach(d => d.classList.remove('active'));
+    dot.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Echo — Experimental UI Showcase (Anti-Dashboard Concepts)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #09080e;
+  --surface: rgba(22, 18, 34, 0.7);
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header bar */
+.showcase-header {
+  height: 64px;
+  background: rgba(14, 11, 22, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* Tabs */
+.concept-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.tab-btn .badge-pill {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Info pill & link */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.open-external-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.open-external-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Main Preview Area */
+.preview-container {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Concept Summary Banner (Collapsible) */
+.concept-drawer {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: 420px;
+  background: rgba(13, 10, 22, 0.82);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  padding: 16px 20px;
+  z-index: 50;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.concept-drawer.collapsed {
+  transform: translateX(calc(-100% - 24px));
+}
+
+.drawer-toggle {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 12px;
+  background: rgba(13, 10, 22, 0.82);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.drawer-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+.drawer-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.rebel-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #c4b5fd;
+}
+
+.rebel-points li::before {
+  content: '⚡ ';
+}
+</style>
+</head>
+<body>
+
+<header class="showcase-header">
+  <div class="brand-section">
+    <div class="logo-badge">E</div>
+    <div class="brand-title">Echo Design Lab</div>
+    <div class="brand-sub">ANTI-DASHBOARD EXPERIMENTS</div>
+  </div>
+
+  <nav class="concept-tabs">
+    <button class="tab-btn active" data-src="concept-4-depth-lock.html" data-id="4">
+      <span>Depth Lock</span>
+      <span class="badge-pill">WALLPAPER DEPTH</span>
+    </button>
+    <button class="tab-btn" data-src="concept-1-gravity.html" data-id="1">
+      <span>Gravity</span>
+      <span class="badge-pill">VERTICAL CANYON</span>
+    </button>
+    <button class="tab-btn" data-src="concept-2-horizon.html" data-id="2">
+      <span>Horizon</span>
+      <span class="badge-pill">WARM EDITORIAL</span>
+    </button>
+    <button class="tab-btn" data-src="concept-3-stratum.html" data-id="3">
+      <span>Stratum</span>
+      <span class="badge-pill">GEOLOGICAL LAYERS</span>
+    </button>
+  </nav>
+
+  <div class="header-actions">
+    <a href="concept-4-depth-lock.html" target="_blank" class="open-external-btn" id="openLink">
+      <span>Open in New Tab</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+</header>
+
+<main class="preview-container">
+  <!-- Interactive Description Drawer -->
+  <div class="concept-drawer" id="drawer">
+    <button class="drawer-toggle" id="drawerToggle" title="Toggle description">✕</button>
+    <h3 class="drawer-title" id="dTitle">Concept 4: Depth Lock</h3>
+    <p class="drawer-desc" id="dDesc">The exact Apple iOS wallpaper depth effect. 4-layer spatial sandwich where the depth-cut foreground subject occludes the giant clock, center lyrics, and transport controls with blurred halos.</p>
+    <ul class="rebel-points" id="dRebels">
+      <li>Subject layers OVER lyrics & clock</li>
+      <li>Frosted blur halo surrounding buttons</li>
+      <li>Full-bleed immersive background</li>
+      <li>Zero dashboard cards or sidebars</li>
+    </ul>
+  </div>
+
+  <iframe src="concept-4-depth-lock.html" id="previewFrame"></iframe>
+</main>
+
+<script>
+const concepts = {
+  "4": {
+    title: "Concept 4: Depth Lock (The Signature)",
+    desc: "Built directly around your exact request: Apple-style wallpaper depth where the album art subject floats in front of the monolithic clock, lyrics, and transport buttons with surrounding frosted blur halos.",
+    rebels: [
+      "Subject layers in front of center lyrics & clock",
+      "Frosted glass halos blur the space around buttons",
+      "True multi-plane 3D mouse parallax",
+      "Total rejection of dashboard grids"
+    ]
+  },
+  "1": {
+    title: "Concept 1: Gravity (Vertical Canyon)",
+    desc: "The album art IS the entire interface. No sidebar or cards. Continuous vertical scroll canyon with orbital glass control rings, flowing queue river, and organic library mosaic.",
+    rebels: [
+      "Scroll-snap vertical zones instead of sidebars",
+      "Orbital glass rings instead of square cards",
+      "Full-bleed art replaces contained panels",
+      "Vertical queue river with real gapless seams"
+    ]
+  },
+  "2": {
+    title: "Concept 2: Horizon (Warm Editorial)",
+    desc: "A total rebellion against cold dark glassmorphism. Warm cream paper palette, serif typography, and a 40/60 horizontal split inspired by Criterion Collection and Japanese print magazines.",
+    rebels: [
+      "Warm paper tones instead of dark OLED",
+      "Serif type instead of system sans",
+      "Cinematic widescreen art container",
+      "Matte ink aesthetics with zero blur glow"
+    ]
+  },
+  "3": {
+    title: "Concept 3: Stratum (Geological Depth)",
+    desc: "Takes depth to its brutalist extreme. Three physical depth strata (Sky, Surface, Bedrock) are stacked spatially, with the depth mask physically occluding lower layers.",
+    rebels: [
+      "Monochrome high-contrast brutalist type",
+      "No pages or tabs: everything stacked spatially",
+      "Geological fault-line transport controls",
+      "Foreground art mask slices through UI text"
+    ]
+  }
+};
+
+const tabs = document.querySelectorAll('.tab-btn');
+const frame = document.getElementById('previewFrame');
+const openLink = document.getElementById('openLink');
+const dTitle = document.getElementById('dTitle');
+const dDesc = document.getElementById('dDesc');
+const dRebels = document.getElementById('dRebels');
+const drawer = document.getElementById('drawer');
+const drawerToggle = document.getElementById('drawerToggle');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    
+    const src = tab.dataset.src;
+    const id = tab.dataset.id;
+    frame.src = src;
+    openLink.href = src;
+
+    const data = concepts[id];
+    dTitle.textContent = data.title;
+    dDesc.textContent = data.desc;
+    dRebels.innerHTML = data.rebels.map(r => `<li>${r}</li>`).join('');
+  });
+});
+
+drawerToggle.addEventListener('click', () => {
+  drawer.classList.toggle('collapsed');
+  drawerToggle.textContent = drawer.classList.contains('collapsed') ? 'ℹ' : '✕';
+});
+</script>
+
+</body>
+</html>
